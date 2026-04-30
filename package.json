@@ -25,5 +25,8 @@
     "globals": "^17.5.0",
     "typescript": "~6.0.2",
     "vite": "^6.2.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
