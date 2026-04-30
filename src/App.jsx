@@ -3,11 +3,10 @@ import { Upload, Camera, Sparkles, RefreshCw, Shirt, User, CheckCircle2, AlertCi
 
 /**
  * THAIS GUSMÃO - PROVADOR VIRTUAL IA
- * Instruções para integração com a Tray:
- * Use a URL: https://SEU-LINK-DA-VERCEL.app/?img={{ product.image }}
+ * Atualizado para redimensionamento automático e integração Tray
  */
 
-const apiKey = "AIzaSyAkpURWPCfchIw1oVK9Ehn5x072FVpQ4Ew"; // Sua chave de API configurada
+const apiKey = "AIzaSyAkpURWPCfchIw1oVK9Ehn5x072FVpQ4Ew"; 
 
 const App = () => {
   const [modelImage, setModelImage] = useState(null);
@@ -21,7 +20,9 @@ const App = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const imgUrl = urlParams.get('img');
     if (imgUrl) {
-      setGarmentImage({ url: decodeURIComponent(imgUrl), isExternal: true });
+      const decodedUrl = decodeURIComponent(imgUrl);
+      setGarmentImage({ url: decodedUrl, isExternal: true });
+      setStatus({ type: 'info', message: 'Produto da loja carregado com sucesso!' });
     }
   }, []);
 
@@ -66,7 +67,7 @@ const App = () => {
     }
 
     setLoading(true);
-    setStatus({ type: 'info', message: 'A IA está a ajustar o look ao seu corpo...' });
+    setStatus({ type: 'info', message: 'A IA está ajustando o look ao seu corpo...' });
 
     try {
       const modelBase64 = await fileToBase64(modelImage.file);
@@ -80,8 +81,7 @@ const App = () => {
       
       if (!garmentBase64) throw new Error("Erro no processamento da imagem.");
 
-      // Prompt otimizado para a marca Thais Gusmão
-      const prompt = `FOTORREALISMO EXTREMO. Veste a roupa da imagem do produto na pessoa da imagem da modelo. Mantém a identidade da pessoa, luz natural de estúdio, estilo Thais Gusmão.`;
+      const prompt = `FOTORREALISMO EXTREMO. Veste a roupa da imagem do produto na pessoa da imagem da modelo. Mantém a identidade da pessoa, luz natural, estilo alta costura Thais Gusmão.`;
 
       const payload = {
         contents: [{
@@ -113,7 +113,7 @@ const App = () => {
         throw new Error("Falha ao gerar imagem.");
       }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Ocorreu um problema técnico. Verifique sua chave de API ou conexão.' });
+      setStatus({ type: 'error', message: 'Ocorreu um erro. Verifique sua chave de API.' });
     } finally {
       setLoading(false);
     }
@@ -131,14 +131,15 @@ const App = () => {
           <div className="space-y-6">
             <div className="border border-gray-100 p-5 rounded-xl bg-gray-50">
               <h3 className="text-sm font-bold uppercase mb-4 flex items-center gap-2"><User size={16}/> 1. Sua Foto</h3>
-              <div className="relative h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-white overflow-hidden hover:border-black transition-all">
+              {/* Ajustado: h-64 para ser maior e object-contain para evitar o zoom/corte */}
+              <div className="relative h-64 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-100 overflow-hidden hover:border-black transition-all">
                 <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'model')} accept="image/*" />
                 {modelImage ? (
-                    <img src={modelImage.url} className="h-full w-full object-cover" alt="Sua foto" />
+                    <img src={modelImage.url} className="h-full w-full object-contain" alt="Sua foto" />
                 ) : (
                     <div className="text-center p-4">
-                        <Camera className="mx-auto text-gray-300 mb-2" />
-                        <p className="text-[10px] text-gray-400">Clique para enviar foto de corpo inteiro</p>
+                        <Camera className="mx-auto text-gray-400 mb-2" />
+                        <p className="text-[10px] text-gray-400">Clique para enviar sua fotografia</p>
                     </div>
                 )}
               </div>
@@ -150,7 +151,7 @@ const App = () => {
                 {garmentImage ? (
                     <img src={garmentImage.url} className="h-full object-contain p-2" alt="Roupa" />
                 ) : (
-                    <p className="text-[10px] text-gray-400 italic">Nenhum produto selecionado</p>
+                    <p className="text-[10px] text-gray-400 italic text-center px-4">Aguardando produto da loja...</p>
                 )}
               </div>
             </div>
@@ -174,7 +175,7 @@ const App = () => {
           <div className="bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center min-h-[500px] relative overflow-hidden">
             {resultImage ? (
               <div className="p-4 flex flex-col items-center gap-4">
-                 <img src={resultImage} className="max-h-[600px] rounded-lg shadow-2xl" alt="Resultado" />
+                 <img src={resultImage} className="max-h-[600px] w-full object-contain rounded-lg shadow-2xl" alt="Resultado" />
               </div>
             ) : (
               <div className="text-center opacity-10">
